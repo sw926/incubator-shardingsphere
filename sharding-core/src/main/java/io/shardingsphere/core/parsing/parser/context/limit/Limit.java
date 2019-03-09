@@ -66,9 +66,9 @@ public final class Limit {
      * @param isFetchAll is fetch all data or not
      * @param databaseType database type
      */
-    public void processParameters(final List<Object> parameters, final boolean isFetchAll, final DatabaseType databaseType) {
+    public void processParameters(final List<Object> parameters, final boolean isFetchAll, final DatabaseType databaseType, final boolean isSingleRouting) {
         fill(parameters);
-        rewrite(parameters, isFetchAll, databaseType);
+        rewrite(parameters, isFetchAll, databaseType, isSingleRouting);
     }
     
     private void fill(final List<Object> parameters) {
@@ -87,17 +87,17 @@ public final class Limit {
         }
     }
     
-    private void rewrite(final List<Object> parameters, final boolean isFetchAll, final DatabaseType databaseType) {
+    private void rewrite(final List<Object> parameters, final boolean isFetchAll, final DatabaseType databaseType,  final boolean isSingleRouting) {
         int rewriteOffset = 0;
         int rewriteRowCount;
         if (isFetchAll) {
             rewriteRowCount = Integer.MAX_VALUE;
-        } else if (isNeedRewriteRowCount(databaseType)) {
+        } else if (isNeedRewriteRowCount(databaseType) && !isSingleRouting) {
             rewriteRowCount = null == rowCount ? -1 : getOffsetValue() + rowCount.getValue();
         } else {
             rewriteRowCount = rowCount.getValue();
         }
-        if (null != offset && offset.getIndex() > -1) {
+        if (null != offset && offset.getIndex() > -1 && !isSingleRouting) {
             parameters.set(offset.getIndex(), rewriteOffset);
         }
         if (null != rowCount && rowCount.getIndex() > -1) {
